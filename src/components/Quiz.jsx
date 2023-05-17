@@ -11,6 +11,7 @@ export default function Quiz() {
   const [questions, setQuestions] = useState([])
   const [answers, setAnswers] = useState([])
   const [result, setResult] = useState('')
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     getQuestions()
@@ -39,9 +40,11 @@ export default function Quiz() {
 
   async function getQuestions() {
     setQuestions([])
+    setLoading(true)
     const response = await fetch('https://opentdb.com/api.php?amount=5')
     const data = await response.json()
     setQuestions(data.results)
+    setLoading(false)
 
     const allAnswers = data.results.map(
       ({ incorrect_answers, correct_answer }) => {
@@ -103,24 +106,24 @@ export default function Quiz() {
     )
   })
 
+  if (loading) {
+    return <Loading />
+  }
+
   return (
     <>
-      {questions.length === 0 ? (
-        <Loading />
-      ) : (
-        <main className="quiz">
-          {questionsData}{' '}
-          <div className="quiz__container">
-            <p className="quiz__result">{result}</p>
-            <button
-              className="hero__button quiz__button"
-              onClick={result.length > 0 ? getQuestions : checkAnswers}
-            >
-              {result.length > 0 ? 'Play again' : 'Check answers'}
-            </button>
-          </div>
-        </main>
-      )}
+      <main className="quiz">
+        {questionsData}{' '}
+        <div className="quiz__container">
+          <p className="quiz__result">{result}</p>
+          <button
+            className="hero__button quiz__button"
+            onClick={result.length > 0 ? getQuestions : checkAnswers}
+          >
+            {result.length > 0 ? 'Play again' : 'Check answers'}
+          </button>
+        </div>
+      </main>
       {result.length > 0 && <Confetti />}
     </>
   )
